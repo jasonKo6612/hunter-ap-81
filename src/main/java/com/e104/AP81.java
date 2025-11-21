@@ -11,19 +11,17 @@ package com.e104;
  * 20230117 Peter Tsai HTHUNTERREQ-1237 [獵才]AP 版更
  */
 
+//import java.io.*;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 import com.ht.util.XmlGlobalHandlerNewAP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 //import com.ht.util.XmlLocalHandlerNewAP;
 
 /**
@@ -34,14 +32,16 @@ import com.ht.util.XmlGlobalHandlerNewAP;
  * Copyright (c) 104hunter All Rights Reserved.<br>
  */
 public class AP81 {
+    private static final Logger logger = LoggerFactory.getLogger(AP81.class);
+
     private static XmlGlobalHandlerNewAP globalXML = null;
     //private static XmlLocalHandlerNewAP localXML = null;
-	
+
     // Log
-    private static File fLogFile = null;
-    private static BufferedWriter bwLogFile = null;
-    private static PrintWriter pw = null;
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy/MM/dd hh:mm:ss" );
+//    private static File fLogFile = null;
+//    private static BufferedWriter bwLogFile = null;
+//    private static PrintWriter pw = null;
+//    private static SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy/MM/dd hh:mm:ss" );
 
     /**
      * <summary>查詢資料</summary><br>
@@ -63,10 +63,11 @@ public class AP81 {
             pstHun = conHun.prepareStatement( "select contact_id,rid from contact_rec where rid<>'0' and (contact_name='' or contact_name is null) order by Rid" );
             pstHun2 = conHun.prepareStatement( "Select CName,EName From Resume where Rid=?" );
             pstHun3 = conHun.prepareStatement( "Update Contact_Rec set contact_name=? where contact_id=?" );
-            bwLogFile.write( "##現有連絡紀錄中 Rid<>0 之人選編號)SQL：" + "select contact_id,rid from contact_rec where rid<>0 and (contact_name='' or contact_name is null) order by Rid" + "\r\n" );
+            logger.info("##現有連絡紀錄中 Rid<>0 之人選編號)SQL：select contact_id,rid from contact_rec where rid<>0 and (contact_name='' or contact_name is null) order by Rid");
+
             rsHun = pstHun.executeQuery();
             while( rsHun.next() ) {
-                bwLogFile.write( "##                               人選編號：" + rsHun.getString( "rid" ) + "\r\n" );
+                logger.info("##                               人選編號：{}", rsHun.getString( "rid" ));
                 pstHun2.clearParameters();
                 pstHun2.setString( 1, rsHun.getString( "rid" ) );
                 rsHun2 = pstHun2.executeQuery();
@@ -77,7 +78,7 @@ public class AP81 {
                     } else if( rsHun2.getString( "EName" ) != null && !rsHun2.getString( "EName" ).equals( "" ) ) {
                         strName = rsHun2.getString( "EName" );
                     }
-                    //bwLogFile.write( "##                                人選姓名：" + strName + "\r\n" );
+                    //logger.debug("##                                人選姓名：{}", strName);
                     // 更新姓名
                     if( strName.length() != 0 ) {
                         pstHun3.clearParameters();
@@ -88,70 +89,55 @@ public class AP81 {
                 }
             }
         } catch( ClassNotFoundException e ) {
-            bwLogFile.write( "##不成功##\r\n" );
-            bwLogFile.write( "queryData() exception :\r\n" );
-            e.printStackTrace( pw );
+            logger.error("queryData() ClassNotFoundException:", e);
         } catch( SQLException e ) {
-            bwLogFile.write( "##不成功##\r\n" );
-            bwLogFile.write( "queryData() exception :\r\n" );
-            e.printStackTrace( pw );
+            logger.error("queryData() SQLException:", e);
         } finally {
             if( rsHun2 != null ) {
                 try {
                     rsHun2.close();
                 } catch( SQLException e ) {
-                    bwLogFile.write( "##不成功##\r\n" );
-                    bwLogFile.write( "queryData() exception :\r\n" );
-                    e.printStackTrace( pw );
+                    logger.warn("queryData() close rsHun2 exception:", e);
                 }
             }
             if( rsHun != null ) {
                 try {
                     rsHun.close();
                 } catch( SQLException e ) {
-                    bwLogFile.write( "##不成功##\r\n" );
-                    bwLogFile.write( "queryData() exception :\r\n" );
-                    e.printStackTrace( pw );
+                    logger.warn("queryData() close rsHun exception:", e);
                 }
             }
             if( pstHun3 != null ) {
                 try {
                     pstHun3.close();
                 } catch( SQLException e ) {
-                    bwLogFile.write( "##不成功##\r\n" );
-                    bwLogFile.write( "queryData() exception :\r\n" );
-                    e.printStackTrace( pw );
+                    logger.warn("queryData() close pstHun3 exception:", e);
                 }
             }
             if( pstHun2 != null ) {
                 try {
                     pstHun2.close();
                 } catch( SQLException e ) {
-                    bwLogFile.write( "##不成功##\r\n" );
-                    bwLogFile.write( "queryData() exception :\r\n" );
-                    e.printStackTrace( pw );
+                    logger.warn("queryData() close pstHun2 exception:", e);
                 }
             }
             if( pstHun != null ) {
                 try {
                     pstHun.close();
                 } catch( SQLException e ) {
-                    bwLogFile.write( "##不成功##\r\n" );
-                    bwLogFile.write( "queryData() exception :\r\n" );
-                    e.printStackTrace( pw );
+                    logger.warn("queryData() close pstHun exception:", e);
                 }
             }
             if( conHun != null ) {
                 try {
                     conHun.close();
                 } catch( SQLException e ) {
-                    bwLogFile.write( "##不成功##\r\n" );
-                    bwLogFile.write( "queryData() exception :\r\n" );
-                    e.printStackTrace( pw );
+                    logger.warn("queryData() close connection exception:", e);
                 }
             }
         }
     }
+
 
     public static void main( String[] args ) throws IOException {
         try {
@@ -159,22 +145,19 @@ public class AP81 {
             //localXML = XmlLocalHandlerNewAP.performParser();
             globalXML = XmlGlobalHandlerNewAP.performParser( 81, "" );
             // 設定file
-            fLogFile = new File( globalXML.getGlobalTagValue( "apini.logpath" ) + "AP81_" + new SimpleDateFormat( "yyyyMMdd" ).format( new Date() ) + ".log" );
-            fLogFile.createNewFile();
-            bwLogFile = new BufferedWriter( new FileWriter( fLogFile.getPath(), true ) );
-            pw = new PrintWriter( bwLogFile );
-            bwLogFile.write( "========== START : " + dateFormat.format( new Date() ) + " ==========\r\n" );
+//            fLogFile = new File( globalXML.getGlobalTagValue( "apini.logpath" ) + "AP81_" + new SimpleDateFormat( "yyyyMMdd" ).format( new Date() ) + ".log" );
+//            fLogFile.createNewFile();
+//            bwLogFile = new BufferedWriter( new FileWriter( fLogFile.getPath(), true ) );
+//            pw = new PrintWriter( bwLogFile );
+            logger.info("========== START ==========");
+
             AP81 newJ81 = new AP81();
             newJ81.queryData();
-            bwLogFile.write( "==========  END  : " + dateFormat.format( new Date() ) + " ==========\r\n" );
+
+            logger.info("==========  END ==========");
         } catch( Exception e ) {
-            bwLogFile.write( "##不成功##\r\n" );
-            bwLogFile.write( "main exception :\r\n" );
-            e.printStackTrace( pw );
+            logger.error("main exception:", e);
         } finally {
-            // file close
-            bwLogFile.close();
-            fLogFile = null;
             //localXML = null;
             globalXML = null;
         }

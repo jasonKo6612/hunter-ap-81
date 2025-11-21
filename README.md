@@ -57,6 +57,15 @@ mysql:mysql-connector-java:5.1.49
 ├── MySQL JDBC 驅動程式
 ├── 用於連接 MySQL 資料庫
 
+ch.qos.logback:logback-classic:1.2.11
+├── ch.qos.logback:logback-core:1.2.12 (傳遞性依賴)
+├── org.slf4j:slf4j-api:1.7.36 (傳遞性依賴)
+├── 日誌框架，取代傳統檔案式日誌
+├── 支援自動日誌滾動、多輸出目標等功能
+
+org.codehaus.janino:janino:3.1.9
+├── Logback 條件式配置支援（可選）
+
 javax.mail:mail:1.4.7
 ├── javax.activation:activation:1.1 (傳遞性依賴)
 ├── JavaMail API (專案中已引入但未使用)
@@ -68,7 +77,12 @@ org.jdom:jdom:1.1
 ### 完整依賴樹
 ```
 compileClasspath
+├── HTUtil.jar (external)
 ├── mysql:mysql-connector-java:5.1.49
+├── ch.qos.logback:logback-classic:1.2.11
+│   ├── ch.qos.logback:logback-core:1.2.12
+│   └── org.slf4j:slf4j-api:1.7.36
+├── org.codehaus.janino:janino:3.1.9
 ├── javax.mail:mail:1.4.7
 │   └── javax.activation:activation:1.1
 └── org.jdom:jdom:1.1
@@ -115,7 +129,7 @@ compileClasspath
 ```
 
 **建置成功後：**
-- JAR 檔案：`build/libs/AP81.jar` (~2.1MB)
+- JAR 檔案：`build/libs/AP81.jar` (~3.8MB)
 - 執行腳本：`build/libs/run.sh`（自動複製）
 
 ## 執行程式
@@ -183,17 +197,50 @@ sudo ./run.sh
 
 ## 日誌檔案
 
+### 日誌框架
+使用 **Logback** 作為日誌框架，配置檔案：`src/main/resources/logback.xml`
+
+### 功能特色
+- ✅ 自動日誌滾動（每日建立新檔案）
+- ✅ 同時輸出到控制台和檔案
+- ✅ 保留 30 天歷史日誌
+- ✅ 日誌總大小限制 1GB
+- ✅ UTF-8 編碼支援
+
 **檔案命名規則**：`AP81_yyyyMMdd.log`
 
-**日誌內容**：
+**日誌格式**：
 ```
-========== START : yyyy/MM/dd hh:mm:ss ==========
-##現有連絡紀錄中 Rid<>0 之人選編號)SQL：...
-##                               人選編號：xxxxx
-==========  END  : yyyy/MM/dd hh:mm:ss ==========
+檔案: yyyy/MM/dd HH:mm:ss LEVEL - message
+控制台: yyyy/MM/dd HH:mm:ss [thread] LEVEL logger - message
+```
+
+**日誌內容範例**：
+```
+2025/11/21 16:30:15 INFO - ========== START : 2025/11/21 16:30:15 ==========
+2025/11/21 16:30:15 INFO - ##現有連絡紀錄中 Rid<>0 之人選編號)SQL：...
+2025/11/21 16:30:15 INFO - ##                               人選編號：12345
+2025/11/21 16:30:20 INFO - ==========  END  : 2025/11/21 16:30:20 ==========
 ```
 
 **日誌位置**：由 `apini.logpath` 配置決定
+
+### 自訂日誌配置
+
+使用外部配置檔案：
+```bash
+java -Dlogback.configurationFile=/path/to/custom-logback.xml -jar AP81.jar
+```
+
+啟用 Logback debug 模式：
+```bash
+java -Dlogback.debug=true -jar AP81.jar
+```
+
+手動指定日誌路徑：
+```bash
+java -DLOG_PATH=/custom/log/path -DLOG_FILE=AP81 -jar AP81.jar
+```
 
 ## 開發歷史
 
@@ -204,6 +251,7 @@ sudo ./run.sh
 - **2015/10/30** - Josie Wu - BEP00-00001-1538 機敏性欄位加密處理(AES)(1)
 - **2016/09/05** - Peter.Tsai - 調整AP架構
 - **2023/01/17** - Peter Tsai - HTHUNTERREQ-1237 [獵才]AP 版更
+- **2025/11/21** - 整合 Logback 日誌框架，取代傳統檔案式日誌
 
 ## 注意事項
 
