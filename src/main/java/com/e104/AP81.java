@@ -1,3 +1,5 @@
+package com.e104;
+
 /**
  * History： <br>
  * 2008/8/13 Sean.Chen Created<br>
