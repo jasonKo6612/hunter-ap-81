@@ -20,11 +20,11 @@ repositories {
 }
 
 dependencies {
-    implementation files('/Users/jason.ko/Work/Patch_lib/HTUtil.jar')
+//    implementation files('/Users/jason.ko/Work/Patch_lib/HTUtil.jar')
 
     implementation 'mysql:mysql-connector-java:5.1.49'
     implementation 'javax.mail:mail:1.4.7'
-    implementation 'org.jdom:jdom:1.1'
+//    implementation 'org.jdom:jdom:1.1'
 
     implementation 'ch.qos.logback:logback-classic:1.2.11'
     implementation 'org.codehaus.janino:janino:3.1.9'
